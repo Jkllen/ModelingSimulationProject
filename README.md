@@ -1,6 +1,6 @@
 
 ```
-InfoAss
+Pre-drivingCrypto
 ├─ assets
 │  └─ background.png
 ├─ controller
@@ -18,12 +18,19 @@ InfoAss
 │  ├─ auth_model.py
 │  ├─ crypto_model.py
 │  ├─ fuzzy_model.py
+│  ├─ monte_carlo_model.py
 │  └─ __pycache__
 │     ├─ auth_model.cpython-312.pyc
 │     ├─ crypto_model.cpython-312.pyc
-│     └─ fuzzy_model.cpython-312.pyc
+│     ├─ fuzzy_model.cpython-312.pyc
+│     └─ monte_carlo_model.cpython-312.pyc
 ├─ README.md
 ├─ report.enc
+├─ report_high_risk.enc
+├─ report_low_risk.enc
+├─ report_medium_risk.enc
+├─ requirements.txt
+├─ test_monte_carlo.py
 └─ view
    ├─ input_view.py
    ├─ qt

@@ -4,6 +4,11 @@ from model.auth_model import login, signup
 from model.fuzzy_model import evaluate_fuzzy
 from model.crypto_model import encrypt_report, decrypt_report
 from view.report_view import generate_report
+from model.monte_carlo_model import (
+    run_monte_carlo_simulation,
+    generate_simulation_report,
+    get_available_scenarios,
+)
 
 
 class AppController:
@@ -21,6 +26,11 @@ class AppController:
 
         self.window.risk_input_screen.back_to_login_requested.connect(self.logout)
         self.window.risk_input_screen.evaluate_requested.connect(self.handle_evaluate)
+        self.window.risk_input_screen.open_simulation_requested.connect(self.show_simulation)
+
+        self.window.simulation_screen.set_scenarios(get_available_scenarios())
+        self.window.simulation_screen.run_simulation_requested.connect(self.handle_simulation)
+        self.window.simulation_screen.back_requested.connect(self.show_risk_input)
 
         self.window.result_screen.back_requested.connect(self.show_risk_input)
         self.window.result_screen.encrypt_requested.connect(self.handle_encrypt)
@@ -37,6 +47,9 @@ class AppController:
 
     def show_risk_input(self):
         self.window.show_risk_input()
+
+    def show_simulation(self):
+        self.window.show_simulation()
 
     def logout(self):
         self.current_client = None
@@ -97,6 +110,26 @@ class AppController:
 
         except Exception as error:
             self._show_message("Evaluation Error", f"Failed to evaluate risk.\n\n{error}")
+
+    def handle_simulation(self, scenario_name: str, iterations: int):
+        if not self.current_client:
+            self._show_message("Session Error", "Please log in first.")
+            return
+
+        try:
+            result = run_monte_carlo_simulation(scenario_name, iterations)
+            report = generate_simulation_report(result)
+
+            self.current_report = report
+            self.window.result_screen.set_result(
+                report,
+                "Simulation Completed",
+                result["average_score"],
+            )
+            self.window.show_result()
+
+        except Exception as error:
+            self._show_message("Simulation Error", f"Failed to run simulation.\n\n{error}")
 
     def handle_encrypt(self):
         if not self.current_report:

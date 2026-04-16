@@ -12,12 +12,17 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, Qt
 from view.qt.ui_parts import CardFrame
+
+
 class RiskInputScreen(QWidget):
     evaluate_requested = pyqtSignal(dict)
     back_to_login_requested = pyqtSignal()
+    open_simulation_requested = pyqtSignal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._build_ui()
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         top_y = 210
@@ -27,11 +32,14 @@ class RiskInputScreen(QWidget):
         card_h = max(430, card_h)
         x = (self.width() - card_w) // 2
         self.card.setGeometry(x, top_y, card_w, card_h)
+
     def _build_ui(self):
         self.card = CardFrame(self)
+
         outer_layout = QVBoxLayout(self.card)
         outer_layout.setContentsMargins(34, 28, 34, 28)
         outer_layout.setSpacing(18)
+
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -44,31 +52,38 @@ class RiskInputScreen(QWidget):
                 background: transparent;
             }
         """)
+
         scroll_container = QWidget()
         scroll_layout = QVBoxLayout(scroll_container)
         scroll_layout.setContentsMargins(10, 10, 10, 10)
         scroll_layout.setSpacing(0)
+
         content_row = QHBoxLayout()
         content_row.setSpacing(44)
+
         left_col = QVBoxLayout()
         right_col = QVBoxLayout()
         left_col.setSpacing(20)
         right_col.setSpacing(20)
+
         self.driver_age = self._spin_row(left_col, "👤", "Driver Age", 18, 70, 30)
         self.driver_experience = self._spin_row(left_col, "🪪", "Driver Experience", 0, 50, 5)
         self.driver_alcohol = self._double_row(left_col, "🍺", "Alcohol Level", 0.0, 1.0, 0.0, 1)
+
         self.lighting = self._combo_row(
             left_col,
             "💡",
             "Lighting Condition",
             ["daylight", "bright", "darkness-light lit", "light lit", "darkness-lights unlit", "unlit", "no lighting"]
         )
+
         self.road_condition = self._combo_row(
             left_col,
             "🚧",
             "Road Condition",
             ["dry", "normal", "wet", "slippery", "muddy", "sand", "flood"]
         )
+
         self.road_type = self._combo_row(
             left_col,
             "🛣️",
@@ -82,31 +97,37 @@ class RiskInputScreen(QWidget):
             "Weather Condition",
             ["clear", "sunny", "windy", "fog", "foggy", "rain", "heavy rain", "storm"]
         )
+
         self.traffic_density = self._combo_row(
             right_col,
             "🚗",
             "Traffic Density",
             ["0", "1", "2"]
         )
+
         self.time_of_day = self._combo_row(
             right_col,
             "🕒",
             "Time Based Data",
             ["morning", "afternoon", "evening", "night"]
         )
+
         self.vehicle_age = self._spin_row(right_col, "🔧", "Vehicle Age", 0, 21, 5)
+
         self.failure_history = self._combo_row(
             right_col,
             "⚠️",
             "Failure History",
             ["no", "yes", "unknown"]
         )
+
         self.maintenance_required = self._combo_row(
             right_col,
             "🛠️",
             "Maintenance Required",
             ["no", "yes"]
         )
+
         self.brake_condition = self._combo_row(
             right_col,
             "🔩",
@@ -118,10 +139,41 @@ class RiskInputScreen(QWidget):
         content_row.addLayout(right_col, 1)
         scroll_layout.addLayout(content_row)
         scroll_layout.addStretch()
+
         scroll.setWidget(scroll_container)
         outer_layout.addWidget(scroll, 1)
+
+        sim_row = QHBoxLayout()
+        sim_row.addStretch()
+
+        self.simulation_btn = QPushButton("Open Monte Carlo Simulation")
+        self.simulation_btn.setFixedHeight(54)
+        self.simulation_btn.setMinimumWidth(320)
+        self.simulation_btn.setMaximumWidth(420)
+        self.simulation_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.simulation_btn.setStyleSheet("""
+            QPushButton {
+                background: #353434;
+                color: white;
+                font-size: 16px;
+                font-weight: 600;
+                border: none;
+                border-radius: 18px;
+                padding: 0 24px;
+            }
+            QPushButton:hover {
+                background: #454343;
+            }
+        """)
+        self.simulation_btn.clicked.connect(self.open_simulation_requested.emit)
+
+        sim_row.addWidget(self.simulation_btn)
+        sim_row.addStretch()
+        outer_layout.addLayout(sim_row)
+
         button_row = QHBoxLayout()
         button_row.addStretch()
+
         self.evaluate_btn = QPushButton("Evaluate Driving Risk")
         self.evaluate_btn.setFixedHeight(64)
         self.evaluate_btn.setMinimumWidth(320)
@@ -151,17 +203,21 @@ class RiskInputScreen(QWidget):
             }
         """)
         self.evaluate_btn.clicked.connect(self._emit_data)
+
         button_row.addWidget(self.evaluate_btn)
         button_row.addStretch()
         outer_layout.addLayout(button_row)
+
     def _make_row_container(self, icon_text: str, label_text: str):
         row = QWidget()
         row_layout = QVBoxLayout(row)
         row_layout.setContentsMargins(0, 0, 0, 0)
         row_layout.setSpacing(8)
+
         header = QHBoxLayout()
         header.setContentsMargins(0, 0, 0, 0)
         header.setSpacing(8)
+
         icon = QLabel(icon_text)
         icon.setStyleSheet("""
             QLabel {
@@ -169,6 +225,7 @@ class RiskInputScreen(QWidget):
                 color: #0A7D8C;
             }
         """)
+
         label = QLabel(label_text)
         label.setStyleSheet("""
             QLabel {
@@ -177,11 +234,14 @@ class RiskInputScreen(QWidget):
                 font-weight: 700;
             }
         """)
+
         header.addWidget(icon)
         header.addWidget(label)
         header.addStretch()
+
         row_layout.addLayout(header)
         return row, row_layout
+
     def _style_combo(self, combo: QComboBox):
         combo.setMinimumHeight(50)
         combo.setMaximumHeight(50)
@@ -200,6 +260,7 @@ class RiskInputScreen(QWidget):
                 width: 34px;
             }
         """)
+
     def _style_spin(self, widget):
         widget.setMinimumHeight(50)
         widget.setMaximumHeight(50)
@@ -214,6 +275,7 @@ class RiskInputScreen(QWidget):
                 color: #434343;
             }
         """)
+
     def _combo_row(self, parent_layout, icon_text, label_text, items):
         row, row_layout = self._make_row_container(icon_text, label_text)
         combo = QComboBox()
@@ -222,6 +284,7 @@ class RiskInputScreen(QWidget):
         row_layout.addWidget(combo)
         parent_layout.addWidget(row)
         return combo
+
     def _spin_row(self, parent_layout, icon_text, label_text, min_val, max_val, default):
         row, row_layout = self._make_row_container(icon_text, label_text)
         spin = QSpinBox()
@@ -231,6 +294,7 @@ class RiskInputScreen(QWidget):
         row_layout.addWidget(spin)
         parent_layout.addWidget(row)
         return spin
+
     def _double_row(self, parent_layout, icon_text, label_text, min_val, max_val, default, decimals):
         row, row_layout = self._make_row_container(icon_text, label_text)
         spin = QDoubleSpinBox()
@@ -242,16 +306,19 @@ class RiskInputScreen(QWidget):
         row_layout.addWidget(spin)
         parent_layout.addWidget(row)
         return spin
+
     def _emit_data(self):
         failure_map = {
             "no": 0.0,
             "yes": 1.0,
             "unknown": 0.5,
         }
+
         maintenance_map = {
             "no": 0.0,
             "yes": 1.0,
         }
+
         inputs = {
             "driver_age": int(self.driver_age.value()),
             "driver_experience": int(self.driver_experience.value()),
@@ -267,6 +334,7 @@ class RiskInputScreen(QWidget):
             "time_of_day": self.time_of_day.currentText(),
             "road_type": self.road_type.currentText(),
         }
+
         self.evaluate_requested.emit(inputs)
 
     def clear_form(self):
