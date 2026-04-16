@@ -86,6 +86,19 @@ class SimulationScreen(QWidget):
                 border: none;
                 width: 34px;
             }
+            QComboBox::down-arrow {
+                image: none;
+                border: none;
+            }
+            QComboBox QAbstractItemView {
+                background: white;
+                color: #222222;
+                border: 1px solid #AFAFAF;
+                selection-background-color: #F3BC23;
+                selection-color: black;
+                padding: 4px;
+                outline: 0;
+            }
         """)
         layout.addWidget(self.scenario_combo)
 
